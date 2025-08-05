@@ -13,12 +13,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { PaystackButton } from "react-paystack";
 import { ExternalLink, Download, ShoppingCart, Check } from "lucide-react";
 import type { StoreItem } from "@shared/schema";
 
 export default function StorePage() {
   const [selectedItem, setSelectedItem] = useState<StoreItem | null>(null);
-  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const { toast } = useToast();
 
   const { data: storeItems, isLoading } = useQuery<StoreItem[]>({
@@ -33,40 +34,52 @@ export default function StorePage() {
     return `$${(price / 100).toFixed(2)}`;
   };
 
+  // Filter items based on selected category
+  const filteredItems = storeItems?.filter(item => 
+    selectedCategory === "All" || item.category === selectedCategory
+  ) || [];
+
+  // Get unique categories
+  const categories = storeItems ? ["All", ...Array.from(new Set(storeItems.map(item => item.category)))] : [];
+
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+  };
+
   const handleBuyClick = (item: StoreItem) => {
     setSelectedItem(item);
   };
 
-  const handlePurchase = async () => {
+  const paystackConfig = {
+    reference: selectedItem ? `${selectedItem.id}-${Date.now()}` : '',
+    email: "customer@example.com", // In real app, get from user input
+    amount: selectedItem ? selectedItem.price : 0, // Amount in kobo (cents)
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_replaceme', // Demo key
+  };
+
+  const handlePaystackSuccess = (reference: any) => {
     if (!selectedItem) return;
     
-    setIsPurchasing(true);
-    
-    // Simulate purchase process
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Purchase Successful!",
-        description: `You've successfully purchased ${selectedItem.title}. Check your email for download instructions.`,
-      });
+    toast({
+      title: "Payment Successful!",
+      description: `You've successfully purchased ${selectedItem.title}. Check your email for download instructions.`,
+    });
 
-      // Close dialog and reset state
-      setSelectedItem(null);
-      
-      // If there's a download URL, open it
-      if (selectedItem.downloadUrl) {
-        window.open(selectedItem.downloadUrl, '_blank');
-      }
-    } catch (error) {
-      toast({
-        title: "Purchase Failed",
-        description: "There was an error processing your purchase. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsPurchasing(false);
+    // Close dialog and reset state
+    setSelectedItem(null);
+    
+    // If there's a download URL, open it
+    if (selectedItem.downloadUrl) {
+      window.open(selectedItem.downloadUrl, '_blank');
     }
+  };
+
+  const handlePaystackClose = () => {
+    toast({
+      title: "Payment Cancelled",
+      description: "Your payment was cancelled. You can try again anytime.",
+      variant: "destructive",
+    });
   };
 
   return (
@@ -159,12 +172,43 @@ export default function StorePage() {
           </section>
         )}
 
+        {/* Categories Filter */}
+        {categories.length > 1 && (
+          <section className="mb-12">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-semibold mb-4">Filter by Category</h2>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
+              {categories.map((category) => (
+                <Badge 
+                  key={category} 
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  className={`text-sm py-2 px-4 cursor-pointer transition-all duration-300 ${
+                    selectedCategory === category 
+                      ? "bg-primary text-white hover:bg-blue-700" 
+                      : "hover:bg-primary hover:text-white"
+                  }`}
+                  onClick={() => handleCategoryClick(category)}
+                  data-testid={`category-${category.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  {category}
+                </Badge>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* All Products Section */}
         <section>
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold mb-4">All Products</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              {selectedCategory === "All" ? "All Products" : `${selectedCategory} Products`}
+            </h2>
             <p className="text-secondary">
-              Browse our complete collection of digital products
+              {selectedCategory === "All" 
+                ? "Browse our complete collection of digital products"
+                : `Showing products in ${selectedCategory} category`
+              }
             </p>
           </div>
 
@@ -184,9 +228,9 @@ export default function StorePage() {
                 </Card>
               ))}
             </div>
-          ) : storeItems && storeItems.length > 0 ? (
+          ) : filteredItems && filteredItems.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {storeItems.map((item) => (
+              {filteredItems.map((item) => (
                 <Card 
                   key={item.id}
                   className="group bg-white dark:bg-neutral-800 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
@@ -243,36 +287,33 @@ export default function StorePage() {
             <div className="text-center py-12">
               <div className="max-w-md mx-auto">
                 <ShoppingCart className="w-16 h-16 mx-auto text-secondary mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No Products Available</h3>
+                <h3 className="text-xl font-semibold mb-2">
+                  {selectedCategory === "All" 
+                    ? "No Products Available" 
+                    : `No Products in ${selectedCategory} Category`
+                  }
+                </h3>
                 <p className="text-secondary">
-                  We're working on adding amazing digital products to our store. 
-                  Check back soon for updates!
+                  {selectedCategory === "All" 
+                    ? "We're working on adding amazing digital products to our store. Check back soon for updates!"
+                    : `No products found in the ${selectedCategory} category. Try selecting a different category or browse all products.`
+                  }
                 </p>
+                {selectedCategory !== "All" && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSelectedCategory("All")}
+                    className="mt-4"
+                  >
+                    View All Products
+                  </Button>
+                )}
               </div>
             </div>
           )}
         </section>
 
-        {/* Categories Section */}
-        {storeItems && storeItems.length > 0 && (
-          <section className="mt-16 pt-16 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold mb-4">Product Categories</h2>
-            </div>
-            <div className="flex flex-wrap justify-center gap-4">
-              {[...new Set(storeItems.map(item => item.category))].map((category) => (
-                <Badge 
-                  key={category} 
-                  variant="outline" 
-                  className="text-lg py-2 px-4 hover:bg-primary hover:text-white transition-colors duration-300 cursor-pointer"
-                  data-testid={`category-${category.toLowerCase().replace(' ', '-')}`}
-                >
-                  {category}
-                </Badge>
-              ))}
-            </div>
-          </section>
-        )}
+
       </div>
 
       {/* Purchase Dialog */}
@@ -332,27 +373,18 @@ export default function StorePage() {
             <Button 
               variant="outline" 
               onClick={() => setSelectedItem(null)}
-              disabled={isPurchasing}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handlePurchase}
-              disabled={isPurchasing}
-              className="bg-primary text-white hover:bg-blue-700"
-            >
-              {isPurchasing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Complete Purchase
-                </>
-              )}
-            </Button>
+            {selectedItem && (
+              <PaystackButton
+                {...paystackConfig}
+                text="Pay with Paystack"
+                onSuccess={handlePaystackSuccess}
+                onClose={handlePaystackClose}
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-white hover:bg-blue-700 h-10 px-4 py-2"
+              />
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
