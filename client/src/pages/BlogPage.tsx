@@ -12,7 +12,7 @@ import type { Post } from "@shared/schema";
 
 export default function BlogPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 6;
 
@@ -23,7 +23,7 @@ export default function BlogPage() {
   const filteredPosts = posts?.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || post.category === categoryFilter;
+    const matchesCategory = !categoryFilter || post.category === categoryFilter;
     return matchesSearch && matchesCategory;
   }) || [];
 
@@ -31,7 +31,7 @@ export default function BlogPage() {
   const startIndex = (currentPage - 1) * postsPerPage;
   const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
 
-  const categories = Array.from(new Set(posts?.map(post => post.category) || []));
+  const categories = [...new Set(posts?.map(post => post.category) || [])];
 
   return (
     <main className="min-h-screen py-16">
@@ -69,7 +69,7 @@ export default function BlogPage() {
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category}

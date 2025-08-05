@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import Footer from "@/components/Footer";
 import { Link } from "wouter";
 import { ExternalLink, Github, Heart, Share2, ArrowRight } from "lucide-react";
 import type { Post, Project } from "@shared/schema";
@@ -240,8 +239,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      
-      <Footer />
     </main>
   );
 }
