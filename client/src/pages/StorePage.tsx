@@ -1,12 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Download, ShoppingCart } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { ExternalLink, Download, ShoppingCart, Check } from "lucide-react";
 import type { StoreItem } from "@shared/schema";
 
 export default function StorePage() {
+  const [selectedItem, setSelectedItem] = useState<StoreItem | null>(null);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const { toast } = useToast();
+
   const { data: storeItems, isLoading } = useQuery<StoreItem[]>({
     queryKey: ["/api/store"],
   });
@@ -17,6 +31,42 @@ export default function StorePage() {
 
   const formatPrice = (price: number) => {
     return `$${(price / 100).toFixed(2)}`;
+  };
+
+  const handleBuyClick = (item: StoreItem) => {
+    setSelectedItem(item);
+  };
+
+  const handlePurchase = async () => {
+    if (!selectedItem) return;
+    
+    setIsPurchasing(true);
+    
+    // Simulate purchase process
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Purchase Successful!",
+        description: `You've successfully purchased ${selectedItem.title}. Check your email for download instructions.`,
+      });
+
+      // Close dialog and reset state
+      setSelectedItem(null);
+      
+      // If there's a download URL, open it
+      if (selectedItem.downloadUrl) {
+        window.open(selectedItem.downloadUrl, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: "Purchase Failed",
+        description: "There was an error processing your purchase. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPurchasing(false);
+    }
   };
 
   return (
@@ -82,6 +132,7 @@ export default function StorePage() {
                       <div className="flex gap-2">
                         <Button 
                           className="flex-1 bg-primary text-white hover:bg-blue-700"
+                          onClick={() => handleBuyClick(item)}
                           data-testid={`button-buy-${item.id}`}
                         >
                           <ShoppingCart className="w-4 h-4 mr-2" />
@@ -165,6 +216,7 @@ export default function StorePage() {
                       <Button 
                         size="sm" 
                         className="flex-1 bg-primary text-white hover:bg-blue-700"
+                        onClick={() => handleBuyClick(item)}
                         data-testid={`button-purchase-${item.id}`}
                       >
                         <Download className="w-3 h-3 mr-1" />
@@ -222,6 +274,88 @@ export default function StorePage() {
           </section>
         )}
       </div>
+
+      {/* Purchase Dialog */}
+      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Complete Purchase</DialogTitle>
+            <DialogDescription>
+              You're about to purchase {selectedItem?.title}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedItem && (
+            <div className="py-4">
+              <div className="flex items-center gap-4 mb-4">
+                <img 
+                  src={selectedItem.image} 
+                  alt={selectedItem.title}
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold">{selectedItem.title}</h3>
+                  <p className="text-sm text-secondary">{selectedItem.category}</p>
+                  <p className="text-lg font-bold text-primary mt-1">
+                    {formatPrice(selectedItem.price)}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm text-secondary mb-2">
+                  <strong>What you'll get:</strong>
+                </p>
+                <ul className="text-sm space-y-1">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3 h-3 text-green-500" />
+                    Instant download access
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3 h-3 text-green-500" />
+                    Lifetime updates
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3 h-3 text-green-500" />
+                    Email support
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3 h-3 text-green-500" />
+                    Commercial license
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setSelectedItem(null)}
+              disabled={isPurchasing}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handlePurchase}
+              disabled={isPurchasing}
+              className="bg-primary text-white hover:bg-blue-700"
+            >
+              {isPurchasing ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Complete Purchase
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
