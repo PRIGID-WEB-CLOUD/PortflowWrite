@@ -4,6 +4,34 @@ import { storage } from "./storage";
 import { insertPostSchema, insertProjectSchema, insertCommentSchema, insertContactSchema, insertStoreItemSchema } from "@shared/schema";
 import { z } from "zod";
 
+// Paystack payment integration
+async function initializePaystackPayment(amount: number, email: string, metadata: any) {
+  const response = await fetch('https://api.paystack.co/transaction/initialize', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      amount: amount * 100, // Paystack expects amount in kobo
+      email,
+      metadata,
+    }),
+  });
+
+  return response.json();
+}
+
+async function verifyPaystackPayment(reference: string) {
+  const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+    headers: {
+      'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+    },
+  });
+
+  return response.json();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Posts routes
   app.get("/api/posts", async (req, res) => {
@@ -247,6 +275,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Download failed" });
+    }
+  });
+
+  // Payment routes
+  app.post("/api/payments/initialize", async (req, res) => {
+    try {
+      const { amount, email, storeItemId } = req.body;
+      
+      if (!amount || !email || !storeItemId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const storeItem = await storage.getStoreItem(storeItemId);
+      if (!storeItem) {
+        return res.status(404).json({ message: "Store item not found" });
+      }
+
+      const paymentData = await initializePaystackPayment(amount, email, {
+        storeItemId,
+        itemTitle: storeItem.title,
+      });
+
+      if (paymentData.status) {
+        res.json({
+          status: true,
+          authorization_url: paymentData.data.authorization_url,
+          access_code: paymentData.data.access_code,
+          reference: paymentData.data.reference,
+        });
+      } else {
+        res.status(400).json({ message: "Payment initialization failed", error: paymentData.message });
+      }
+    } catch (error) {
+      console.error('Payment initialization error:', error);
+      res.status(500).json({ message: "Failed to initialize payment" });
+    }
+  });
+
+  app.post("/api/payments/verify", async (req, res) => {
+    try {
+      const { reference } = req.body;
+      
+      if (!reference) {
+        return res.status(400).json({ message: "Payment reference is required" });
+      }
+
+      const verificationData = await verifyPaystackPayment(reference);
+
+      if (verificationData.status && verificationData.data.status === 'success') {
+        // Payment was successful, you can update your database here
+        res.json({
+          status: true,
+          data: {
+            reference: verificationData.data.reference,
+            amount: verificationData.data.amount / 100, // Convert from kobo back to naira
+            status: verificationData.data.status,
+            metadata: verificationData.data.metadata,
+          }
+        });
+      } else {
+        res.status(400).json({ 
+          message: "Payment verification failed", 
+          status: false,
+          data: verificationData.data 
+        });
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      res.status(500).json({ message: "Failed to verify payment" });
     }
   });
 

@@ -94,6 +94,10 @@ export class MemStorage implements IStorage {
       const fullProject: Project = {
         ...project,
         id,
+        technologies: project.technologies || [],
+        liveUrl: project.liveUrl || null,
+        githubUrl: project.githubUrl || null,
+        featured: project.featured || false,
         createdAt: new Date()
       };
       this.projects.set(id, fullProject);
@@ -130,74 +134,7 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    this.storeItems = [
-      {
-        id: "store-1",
-        title: "React Component Library",
-        description: "A comprehensive collection of 50+ production-ready React components with TypeScript support, dark mode, and accessibility features.",
-        price: 4900, // $49.00 in cents
-        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-        category: "Templates",
-        downloadUrl: "https://github.com/example/react-components",
-        featured: true,
-        createdAt: new Date()
-      },
-      {
-        id: "store-2", 
-        title: "Node.js API Starter Kit",
-        description: "Complete REST API boilerplate with authentication, database integration, testing setup, and deployment configuration.",
-        price: 3900, // $39.00 in cents
-        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-        category: "Boilerplates",
-        downloadUrl: "https://github.com/example/node-api-starter",
-        featured: true,
-        createdAt: new Date()
-      },
-      {
-        id: "store-3",
-        title: "Dashboard UI Kit",
-        description: "Modern admin dashboard template with charts, tables, forms, and 20+ pages. Built with React and Tailwind CSS.",
-        price: 5900, // $59.00 in cents
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-        category: "Templates",
-        downloadUrl: "https://github.com/example/dashboard-ui",
-        featured: false,
-        createdAt: new Date()
-      },
-      {
-        id: "store-4",
-        title: "E-commerce Mobile App",
-        description: "Complete React Native e-commerce app with cart, payments, user authentication, and admin panel.",
-        price: 7900, // $79.00 in cents
-        image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-        category: "Mobile Apps",
-        downloadUrl: "https://github.com/example/rn-ecommerce",
-        featured: true,
-        createdAt: new Date()
-      },
-      {
-        id: "store-5",
-        title: "Landing Page Templates",
-        description: "Collection of 10 high-converting landing page templates for SaaS, agencies, and startups. Fully responsive.",
-        price: 2900, // $29.00 in cents
-        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-        category: "Templates",
-        downloadUrl: "https://github.com/example/landing-templates",
-        featured: false,
-        createdAt: new Date()
-      },
-      {
-        id: "store-6",
-        title: "Python Data Analysis Toolkit",
-        description: "Comprehensive Python scripts and Jupyter notebooks for data analysis, visualization, and machine learning workflows.",
-        price: 3400, // $34.00 in cents
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
-        category: "Tools",
-        downloadUrl: "https://github.com/example/python-data-toolkit",
-        featured: false,
-        createdAt: new Date()
-      }
-    ];
+    // Store items will be initialized below using the Map structure
 
     samplePosts.forEach(post => {
       const id = randomUUID();
@@ -205,10 +142,56 @@ export class MemStorage implements IStorage {
       const fullPost: Post = {
         ...post,
         id,
+        tags: post.tags || [],
+        featuredImage: post.featuredImage || null,
+        published: post.published || false,
         createdAt: now,
         updatedAt: now
       };
       this.posts.set(id, fullPost);
+    });
+
+    // Initialize with sample store items
+    const sampleStoreItems: InsertStoreItem[] = [
+      {
+        title: "React Component Library",
+        description: "A comprehensive library of reusable React components with TypeScript support and modern styling.",
+        price: 2999, // in cents
+        image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        category: "Templates",
+        downloadUrl: "https://example.com/downloads/react-components",
+        featured: true
+      },
+      {
+        title: "Next.js Starter Kit",
+        description: "Complete Next.js boilerplate with authentication, database integration, and deployment ready setup.",
+        price: 4999,
+        image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        category: "Boilerplates",
+        downloadUrl: "https://example.com/downloads/nextjs-starter",
+        featured: true
+      },
+      {
+        title: "UI Design System",
+        description: "Professional design system with Figma files, components, and documentation for modern web apps.",
+        price: 7999,
+        image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        category: "Design",
+        downloadUrl: "https://example.com/downloads/design-system",
+        featured: true
+      }
+    ];
+
+    sampleStoreItems.forEach(item => {
+      const id = randomUUID();
+      const fullItem: StoreItem = {
+        ...item,
+        id,
+        downloadUrl: item.downloadUrl || null,
+        featured: item.featured || false,
+        createdAt: new Date()
+      };
+      this.storeItems.set(id, fullItem);
     });
   }
 
@@ -253,7 +236,15 @@ export class MemStorage implements IStorage {
   async createPost(insertPost: InsertPost): Promise<Post> {
     const id = randomUUID();
     const now = new Date();
-    const post: Post = { ...insertPost, id, createdAt: now, updatedAt: now };
+    const post: Post = { 
+      ...insertPost, 
+      id, 
+      tags: insertPost.tags || [],
+      featuredImage: insertPost.featuredImage || null,
+      published: insertPost.published || false,
+      createdAt: now, 
+      updatedAt: now 
+    };
     this.posts.set(id, post);
     return post;
   }
@@ -294,7 +285,15 @@ export class MemStorage implements IStorage {
 
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = randomUUID();
-    const project: Project = { ...insertProject, id, createdAt: new Date() };
+    const project: Project = { 
+      ...insertProject, 
+      id, 
+      technologies: insertProject.technologies || [],
+      liveUrl: insertProject.liveUrl || null,
+      githubUrl: insertProject.githubUrl || null,
+      featured: insertProject.featured || false,
+      createdAt: new Date() 
+    };
     this.projects.set(id, project);
     return project;
   }
@@ -357,7 +356,13 @@ export class MemStorage implements IStorage {
 
   async createStoreItem(insertStoreItem: InsertStoreItem): Promise<StoreItem> {
     const id = randomUUID();
-    const item: StoreItem = { ...insertStoreItem, id, createdAt: new Date() };
+    const item: StoreItem = { 
+      ...insertStoreItem, 
+      id, 
+      downloadUrl: insertStoreItem.downloadUrl || null,
+      featured: insertStoreItem.featured || false,
+      createdAt: new Date() 
+    };
     this.storeItems.set(id, item);
     return item;
   }

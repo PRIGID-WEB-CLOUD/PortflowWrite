@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink, Download, ShoppingCart } from "lucide-react";
-import PaystackButton from "@/components/PaystackButton";
+import { PaymentButton } from "@/components/PaymentButton";
 import { useLocation } from "wouter";
 import type { StoreItem } from "@shared/schema";
 
@@ -89,14 +89,8 @@ export default function StorePage() {
                       </h3>
                       <p className="text-secondary mb-4">{item.description}</p>
                       <div className="flex gap-2">
-                        <PaystackButton
-                          amount={item.price}
-                          title={item.title}
-                          itemId={item.id}
-                          onSuccess={() => {
-                            // Handle successful purchase
-                            console.log(`Successfully purchased: ${item.title}`);
-                          }}
+                        <PaymentButton
+                          storeItem={item}
                         />
                         {item.downloadUrl && (
                           <Button 
@@ -176,13 +170,8 @@ export default function StorePage() {
                       {item.description}
                     </p>
                     <div className="flex gap-2">
-                      <PaystackButton
-                        amount={item.price}
-                        title={item.title}
-                        itemId={item.id}
-                        onSuccess={() => {
-                          console.log(`Successfully purchased: ${item.title}`);
-                        }}
+                      <PaymentButton
+                        storeItem={item}
                       />
                       {item.downloadUrl && (
                         <Button 
@@ -222,7 +211,7 @@ export default function StorePage() {
               <h2 className="text-2xl font-bold mb-4">Product Categories</h2>
             </div>
             <div className="flex flex-wrap justify-center gap-4">
-              {[...new Set(storeItems.map(item => item.category))].map((category) => (
+              {Array.from(new Set(storeItems.map(item => item.category))).map((category) => (
                 <Badge 
                   key={category} 
                   variant="outline" 
