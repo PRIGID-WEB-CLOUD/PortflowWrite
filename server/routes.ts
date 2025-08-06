@@ -208,6 +208,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment verification route
+  app.post("/api/payments/verify", async (req, res) => {
+    try {
+      const { reference, item_id } = req.body;
+      
+      // In a real implementation, you would verify the payment with Paystack
+      // using their API and your secret key
+      console.log(`Payment verification for reference: ${reference}, item: ${item_id}`);
+      
+      // For demo purposes, we'll assume the payment is valid
+      // In production, make a request to Paystack's verification endpoint
+      
+      res.json({ 
+        status: 'success', 
+        message: 'Payment verified successfully',
+        download_url: '/api/downloads/' + item_id
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Payment verification failed" });
+    }
+  });
+
+  // Download endpoint (protected)
+  app.get("/api/downloads/:itemId", async (req, res) => {
+    try {
+      const item = await storage.getStoreItem(req.params.itemId);
+      if (!item) {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      
+      // In a real implementation, you would check if the user has purchased this item
+      // For demo purposes, we'll redirect to the download URL
+      if (item.downloadUrl) {
+        res.redirect(item.downloadUrl);
+      } else {
+        res.status(404).json({ message: "Download not available" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Download failed" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

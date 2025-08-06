@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink, Download, ShoppingCart } from "lucide-react";
+import PaystackButton from "@/components/PaystackButton";
 import type { StoreItem } from "@shared/schema";
 
 export default function StorePage() {
@@ -80,13 +81,15 @@ export default function StorePage() {
                       <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
                       <p className="text-secondary mb-4">{item.description}</p>
                       <div className="flex gap-2">
-                        <Button 
-                          className="flex-1 bg-primary text-white hover:bg-blue-700"
-                          data-testid={`button-buy-${item.id}`}
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Buy Now
-                        </Button>
+                        <PaystackButton
+                          amount={item.price}
+                          title={item.title}
+                          itemId={item.id}
+                          onSuccess={() => {
+                            // Handle successful purchase
+                            console.log(`Successfully purchased: ${item.title}`);
+                          }}
+                        />
                         {item.downloadUrl && (
                           <Button 
                             variant="outline" 
@@ -162,14 +165,14 @@ export default function StorePage() {
                       {item.description}
                     </p>
                     <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-primary text-white hover:bg-blue-700"
-                        data-testid={`button-purchase-${item.id}`}
-                      >
-                        <Download className="w-3 h-3 mr-1" />
-                        Buy
-                      </Button>
+                      <PaystackButton
+                        amount={item.price}
+                        title={item.title}
+                        itemId={item.id}
+                        onSuccess={() => {
+                          console.log(`Successfully purchased: ${item.title}`);
+                        }}
+                      />
                       {item.downloadUrl && (
                         <Button 
                           variant="outline" 
