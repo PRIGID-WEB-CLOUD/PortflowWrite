@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NavigationHeader from "@/components/NavigationHeader";
+import Footer from "@/components/Footer";
 import HomePage from "@/pages/HomePage";
 import AboutPage from "@/pages/AboutPage";
 import ProjectsPage from "@/pages/ProjectsPage";
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/store" component={StorePage} />
         <Route component={NotFound} />
       </Switch>
+      <Footer />
     </>
   );
 }
