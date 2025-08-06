@@ -5,9 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink, Download, ShoppingCart } from "lucide-react";
 import PaystackButton from "@/components/PaystackButton";
+import { useLocation } from "wouter";
 import type { StoreItem } from "@shared/schema";
 
 export default function StorePage() {
+  const [, navigate] = useLocation();
+  
   const { data: storeItems, isLoading } = useQuery<StoreItem[]>({
     queryKey: ["/api/store"],
   });
@@ -78,7 +81,12 @@ export default function StorePage() {
                           {formatPrice(item.price)}
                         </span>
                       </div>
-                      <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                      <h3 
+                        className="text-xl font-semibold mb-2 cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => navigate(`/store/product/${item.id}`)}
+                      >
+                        {item.title}
+                      </h3>
                       <p className="text-secondary mb-4">{item.description}</p>
                       <div className="flex gap-2">
                         <PaystackButton
@@ -158,7 +166,10 @@ export default function StorePage() {
                         {formatPrice(item.price)}
                       </span>
                     </div>
-                    <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors duration-300">
+                    <h3 
+                      className="font-semibold mb-2 group-hover:text-primary transition-colors duration-300 cursor-pointer"
+                      onClick={() => navigate(`/store/product/${item.id}`)}
+                    >
                       {item.title}
                     </h3>
                     <p className="text-secondary text-sm mb-3 line-clamp-2">

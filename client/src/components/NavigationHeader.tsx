@@ -20,6 +20,7 @@ export default function NavigationHeader() {
     { path: "/blog", label: "Blog" },
     { path: "/store", label: "Store" },
     { path: "/contact", label: "Contact" },
+    { path: "/portfolio", label: "Portfolio" }, // Added Portfolio to navItems
   ];
 
   return (
@@ -27,9 +28,9 @@ export default function NavigationHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <Link href="/" className="flex items-center" data-testid="link-home">
-            <h1 className="text-xl font-bold text-primary">Alex Chen</h1>
+            <h1 className="text-xl font-bold text-primary">Jhaid Dev</h1>
           </Link>
-          
+
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (

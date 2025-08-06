@@ -9,6 +9,7 @@ export default function Footer() {
       { name: "Home", href: "/" },
       { name: "About", href: "/about" },
       { name: "Projects", href: "/projects" },
+      { name: "Portfolio", href: "/portfolio" },
       { name: "Blog", href: "/blog" },
       { name: "Store", href: "/store" },
       { name: "Contact", href: "/contact" },
@@ -48,7 +49,7 @@ export default function Footer() {
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="flex items-center mb-4" data-testid="footer-brand">
-              <h2 className="text-2xl font-bold text-primary">Alex Chen</h2>
+              <h2 className="text-2xl font-bold text-primary">Jhaid Dev</h2>
             </Link>
             <p className="text-secondary mb-6 max-w-md leading-relaxed">
               Full-stack developer passionate about creating beautiful, functional web applications 
@@ -95,11 +96,11 @@ export default function Footer() {
             <div className="space-y-3 text-secondary">
               <p>
                 <a 
-                  href="mailto:alex@alexchen.dev" 
+                  href="mailto:jhaid@example.com" 
                   className="hover:text-primary transition-colors duration-300"
                   data-testid="footer-email"
                 >
-                  alex@alexchen.dev
+                  jhaid@example.com
                 </a>
               </p>
               <p>San Francisco, CA</p>
@@ -113,7 +114,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-secondary text-sm flex items-center">
-            © {currentYear} Alex Chen. Made with{" "}
+            © {currentYear} Jhaid Dev. Made with{" "}
             <Heart className="w-4 h-4 mx-1 text-red-500" />
             in San Francisco.
           </p>
