@@ -23,7 +23,7 @@ export default function BlogPage() {
   const filteredPosts = posts?.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || post.category === categoryFilter;
+    const matchesCategory = !categoryFilter || categoryFilter === "all" || post.category === categoryFilter;
     return matchesSearch && matchesCategory;
   }) || [];
 
@@ -69,7 +69,7 @@ export default function BlogPage() {
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
                   {category}

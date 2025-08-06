@@ -16,25 +16,25 @@ export default function Footer() {
     social: [
       {
         name: "GitHub",
-        href: "https://github.com",
+        href: "https://github.com/alexchen",
         icon: Github,
         color: "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
       },
       {
         name: "LinkedIn",
-        href: "https://linkedin.com",
+        href: "https://linkedin.com/in/alexchen",
         icon: Linkedin,
         color: "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
       },
       {
         name: "Twitter",
-        href: "https://twitter.com",
+        href: "https://twitter.com/alexchen",
         icon: Twitter,
         color: "text-blue-400 hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-200"
       },
       {
         name: "Email",
-        href: "mailto:alex@example.com",
+        href: "mailto:alex@alexchen.dev",
         icon: Mail,
         color: "text-primary hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
       },
@@ -95,11 +95,11 @@ export default function Footer() {
             <div className="space-y-3 text-secondary">
               <p>
                 <a 
-                  href="mailto:alex@example.com" 
+                  href="mailto:alex@alexchen.dev" 
                   className="hover:text-primary transition-colors duration-300"
                   data-testid="footer-email"
                 >
-                  alex@example.com
+                  alex@alexchen.dev
                 </a>
               </p>
               <p>San Francisco, CA</p>
